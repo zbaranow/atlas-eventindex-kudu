@@ -6,11 +6,14 @@ import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder;
 import org.apache.kudu.Schema;
 import org.apache.kudu.Type;
 import org.apache.kudu.client.*;
+import org.apache.kudu.client.KuduScanner.KuduScannerBuilder;
 
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.Integer;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -35,7 +38,7 @@ public class EI {
   private static final String COLUMNS = System.getProperty(
       "columns", "runnumber eventnumber db0");
 
-
+  private static long count=0;
 
   public static void main(String[] args) {
 /*    System.out.println("Connecting to " + KUDU_MASTER);
@@ -68,41 +71,32 @@ public class EI {
 	String[] columns = COLUMNS.split(" ");
 
 
-	long runnumber=Long.parseLong(args[0]);
-	long eventnumber=Long.parseLong(args[1]);
-
-	KuduPredicate predRun = KuduPredicate.newComparisonPredicate(
-		new ColumnSchemaBuilder("runnumber", Type.INT64).build(),
-		KuduPredicate.ComparisonOp.EQUAL, runnumber);
-
-	KuduPredicate predEvent = KuduPredicate.newComparisonPredicate(
-                new ColumnSchemaBuilder("eventnumber", Type.INT64).build(),
-                KuduPredicate.ComparisonOp.EQUAL, eventnumber);
-
-
 	//TABLE SCANNER
 
 	long startTime = System.currentTimeMillis();
-	KuduScanner scanner = client.newScannerBuilder(table)
-		.setProjectedColumnNames((List<String>)Arrays.asList(columns))
-		.addPredicate(predRun)
-		.addPredicate(predEvent)
-	        .build();
 
+	   if (SOURCE_FILE.equals("nofile"))
+	   {
+		KuduScannerBuilder scannerBuilder =  client.newScannerBuilder(table);
+                if (!COLUMNS.equals("all")) scannerBuilder.setProjectedColumnNames((List<String>)Arrays.asList(columns));
 
-        //Iterating over results
-	long count=0;
-	
-	while (scanner.hasMoreRows()) {
-        	RowResultIterator results = scanner.nextRows();
-	        while (results.hasNext()) {
-        	  RowResult result = results.next();
-	          	System.out.println((count++)+": "+result.rowToString());
-			
-        }
-	 System.out.println("Took "+(System.currentTimeMillis()-startTime)+" ms");
+		scan(scannerBuilder,Long.parseLong(args[0]),Long.parseLong(args[1]));
+	   }
+	   else{
+		BufferedReader br = new BufferedReader(new FileReader(SOURCE_FILE));
+		for(String line; (line = br.readLine()) != null; ) {
 
-      }
+			String[] pk = line.split(" ");
+			KuduScannerBuilder scannerBuilder =  client.newScannerBuilder(table);
+			if (!COLUMNS.equals("all")) scannerBuilder.setProjectedColumnNames((List<String>)Arrays.asList(columns));
+
+	                scan(scannerBuilder,Long.parseLong(pk[0]),Long.parseLong(pk[1]));
+
+    		}
+	   }
+	    
+	System.out.println("Took "+(System.currentTimeMillis()-startTime)+" ms, avg time per scan "+count/(float)(System.currentTimeMillis()-startTime)+" ms"  );
+
 	
     }
     catch(Exception e)
@@ -117,6 +111,34 @@ public class EI {
         }
       
     }
+  }
+
+  static void scan(KuduScannerBuilder sb, long runnumber, long eventnumber) throws KuduException
+  {
+	//System.out.println(runnumber+" "+eventnumber);
+	
+	KuduPredicate predRun = KuduPredicate.newComparisonPredicate(
+                new ColumnSchemaBuilder("runnumber", Type.INT64).build(),
+                KuduPredicate.ComparisonOp.EQUAL, runnumber);
+
+        KuduPredicate predEvent = KuduPredicate.newComparisonPredicate(
+                new ColumnSchemaBuilder("eventnumber", Type.INT64).build(),
+                KuduPredicate.ComparisonOp.EQUAL, eventnumber);
+
+	sb.addPredicate(predRun).addPredicate(predEvent);
+
+        KuduScanner scanner =sb.build();
+
+
+	while (scanner.hasMoreRows()) {
+                RowResultIterator results = scanner.nextRows();
+                while (results.hasNext()) {
+                  RowResult result = results.next();
+                        System.out.println((count++)+": "+result.rowToString());
+		}
+        }
+
+
   }
 }
 

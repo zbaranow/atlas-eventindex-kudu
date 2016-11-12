@@ -6,17 +6,40 @@ import org.apache.kudu.Schema;
 import org.apache.kudu.Type;
 import org.apache.kudu.client.*;
 
-
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CreateEITable {
 
+
+//SETTINGS
   private static final String KUDU_MASTER = System.getProperty(
       "kuduMaster", "null");
 
   private static final String TABLE_NAME = System.getProperty(
       "tableName", "KuduTable");
+
+  private static final int REPLICAS = Integer.parseInt(System.getProperty(
+      "replication", "3"));
+
+  private static final String RANGE_COLUMNS = System.getProperty(
+      "rangeColumns", "runnumber");
+  
+  private static final int RANGE = Integer.parseInt(System.getProperty(
+      "range", "25000"));
+
+  private static final int RANGE_START = Integer.parseInt(System.getProperty(
+      "rangeStart", "175000"));
+
+  private static final int RANGE_STOP = Integer.parseInt(System.getProperty(
+      "rangeStop", "500000"));
+
+  private static final String HASH_COLUMNS = System.getProperty(
+      "rangeColumns", "runnumber eventnumber");
+
+  private static final int HASH_BUCKETS = Integer.parseInt(System.getProperty(
+      "hashBackets", "4"));
 
 
   public static void main(String[] args) {
@@ -105,27 +128,20 @@ columns.add(new ColumnSchema.ColumnSchemaBuilder("eftrigchainsrs", Type.STRING).
 
 
 //setting partitioning columns
-List<String> partColumns = new ArrayList<>();
-partColumns.add("runnumber");
-//partColumns.add("project");
-//partColumns.add("streamname");
-//partColumns.add("prodstep");
-//partColumns.add("datatype");
-//partColumns.add("amitag");
-//CreateTableOptions options = new CreateTableOptions().addHashPartitions(partColumns, 12).setNumReplicas(2);
-
+List<String> rangeColumns = Arrays.asList(RANGE_COLUMNS.split(" "));
+List<String> hashColumns = Arrays.asList(HASH_COLUMNS.split(" "));
 
 
 
 CreateTableOptions options = new CreateTableOptions();
 
-options.setRangePartitionColumns(partColumns);
+options.setRangePartitionColumns(rangeColumns);
  PartialRow row = null;
 
 
 //Create range partition for each 250k runnumber ids
 
-for (int i =175000; i<=400000;i+=25000)
+for (int i =RANGE_START; i<=RANGE_STOP;i+=RANGE)
 {
 	row= new PartialRow(schema);
 	row.addLong("runnumber",i);
@@ -134,8 +150,8 @@ for (int i =175000; i<=400000;i+=25000)
 	
 //creating subbackets
 
-        options.addHashPartitions(partColumns, 4);
-	options.setNumReplicas(3);
+        options.addHashPartitions(hashColumns, HASH_BUCKETS);
+	options.setNumReplicas(REPLICAS);
 
 
 
