@@ -23,6 +23,9 @@ public class CreateEITable {
   private static final int REPLICAS = Integer.parseInt(System.getProperty(
       "replication", "3"));
 
+  private static final String REPLACE_TABLE = System.getProperty(
+      "replace", "N");
+
   private static final String RANGE_COLUMNS = System.getProperty(
       "rangeColumns", "runnumber");
   
@@ -51,12 +54,16 @@ public class CreateEITable {
 //establishing connection
     KuduClient client = new KuduClient.KuduClientBuilder(KUDU_MASTER).build();
 
-//delete an old table if already exists
- try{
+if (REPLACE_TABLE.toUpperCase().equals("Y"))
+{
+
+  //delete an old table if already exists
+   try{
                 client.deleteTable(TABLE_NAME);
         }
          catch (Exception e) {
         }
+}
 
 
     try {

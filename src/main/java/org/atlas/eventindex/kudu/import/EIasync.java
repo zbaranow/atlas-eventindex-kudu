@@ -6,7 +6,8 @@ import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder;
 import org.apache.kudu.Schema;
 import org.apache.kudu.Type;
 import org.apache.kudu.client.*;
-import org.apache.kudu.client.KuduScanner.KuduScannerBuilder;
+import org.apache.kudu.client.AsyncKuduScanner.AsyncKuduScannerBuilder;
+import com.stumbleupon.async.Deferred;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.logging.LogManager;
 
 
 
-public class EI {
+public class EIasync {
 
   private static final String KUDU_MASTER = System.getProperty(
       "kuduMaster", "null");
@@ -42,12 +43,15 @@ public class EI {
 
   public static void main(String[] args) {
 
+    AsyncKuduClient aclient=null;
     KuduClient client=null;
 
     try
     {
 	//establishing connection
+        aclient = new AsyncKuduClient.AsyncKuduClientBuilder(KUDU_MASTER).build();
         client = new KuduClient.KuduClientBuilder(KUDU_MASTER).build();
+
 	KuduTable table = client.openTable(TABLE_NAME);
 
 
@@ -60,7 +64,7 @@ public class EI {
 
 	   if (SOURCE_FILE.equals("nofile"))
 	   {
-		KuduScannerBuilder scannerBuilder =  client.newScannerBuilder(table);
+		AsyncKuduScannerBuilder scannerBuilder =  aclient.newScannerBuilder(table);
                 if (!COLUMNS.equals("all")) scannerBuilder.setProjectedColumnNames((List<String>)Arrays.asList(columns));
 
 		scan(scannerBuilder,Long.parseLong(args[0]),Long.parseLong(args[1]));
@@ -70,7 +74,7 @@ public class EI {
 		for(String line; (line = br.readLine()) != null; ) {
 
 			String[] pk = line.split(" ");
-			KuduScannerBuilder scannerBuilder =  client.newScannerBuilder(table);
+			AsyncKuduScannerBuilder scannerBuilder =  aclient.newScannerBuilder(table);
 			if (!COLUMNS.equals("all")) scannerBuilder.setProjectedColumnNames((List<String>)Arrays.asList(columns));
 
 	                scan(scannerBuilder,Long.parseLong(pk[0]),Long.parseLong(pk[1]));
@@ -78,7 +82,7 @@ public class EI {
     		}
 	   }
 	    
-	System.out.println(count+" requests in serial took "+(System.currentTimeMillis()-startTime)+" ms, avg time per request "+(System.currentTimeMillis()-startTime)/(float)count+" ms"  );
+	System.out.println("Took "+(System.currentTimeMillis()-startTime)+" ms, avg time per scan "+count/(float)(System.currentTimeMillis()-startTime)+" ms"  );
 
 	
     }
@@ -96,7 +100,7 @@ public class EI {
     }
   }
 
-  static void scan(KuduScannerBuilder sb, long runnumber, long eventnumber) throws KuduException
+  static void scan(AsyncKuduScannerBuilder sb, long runnumber, long eventnumber) throws KuduException
   {
 	//System.out.println(runnumber+" "+eventnumber);
 	
@@ -110,15 +114,15 @@ public class EI {
 
 	sb.addPredicate(predRun).addPredicate(predEvent);
 
-        KuduScanner scanner =sb.build();
+        AsyncKuduScanner scanner =sb.build();
 
 
 	while (scanner.hasMoreRows()) {
-                RowResultIterator results = scanner.nextRows();
-                while (results.hasNext()) {
-                  RowResult result = results.next();
-                        System.out.println((count++)+": "+result.rowToString());
-		}
+                Deferred<RowResultIterator> results = scanner.nextRows();
+                //while (results.hasNext()) {
+                  //RowResult result = results.next();
+                    //    System.out.println((count++)+": "+result.rowToString());
+	//	}
         }
 
 
