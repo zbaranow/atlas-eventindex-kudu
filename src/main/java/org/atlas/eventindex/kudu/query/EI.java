@@ -1,4 +1,4 @@
-package org.cern.atlas.eventindex.kudu;
+package org.cern.atlas.eventindex.kudu.query;
 
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder;
