@@ -19,7 +19,7 @@ In order to run the class use you have to specify
 
 ###### Example
 
-`java -DkuduMaster=haperf100 -DtableName=atlas_event_index -cp target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.CreateEITable`
+`java -DkuduMaster=haperf100 -DtableName=atlas_event_index -cp target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.ingest.CreateEITable`
 
 Importing a dataset from a mapfile
 --------------
@@ -33,7 +33,7 @@ The following parameters have to be specified:
 
 ###### Example
 
-`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex -Dfile=/user/atlevind/EI16.1/data16_cos.00299680.physics_Late.merge.AOD.f703_m1600 -cp \$(hadoop classpath):./atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.KuduImport`
+`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex -Dfile=/user/atlevind/EI16.1/data16_cos.00299680.physics_Late.merge.AOD.f703_m1600 -cp \$(hadoop classpath):./atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.ingest.KuduImport`
 
 
 Event picking
@@ -47,19 +47,19 @@ Parameters to be specified:
 
 ###### Example1
 
-`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex -cp ./target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.EI 263965`
+`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex -cp ./target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.query.EI 263965`
 
 Optionally list of columns to be returned (beside GUID) can be spcified as a space
 separated string with <b>-Dcolumns</b> option (for all colummns specify "all").
 
 ###### Example2
 
-`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex  -Dcolumns="all" -cp ./target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.EI 263965`
+`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex  -Dcolumns="all" -cp ./target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.query.EI 263965`
 
 It is also possibility to query multiple runnumber and eventnumber pairs by
 sourcing them from a file with option <b>-Dfile</b>
 
 ###### Example3
 
-`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex  -Dcolumns="all" -Dfile=./picklist.txt -cp ./target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.EI 263965`
+`java -DkuduMaster=haperf100 -DtableName=atlas_eventindex  -Dcolumns="all" -Dfile=./picklist.txt -cp ./target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.query.EI 263965`
 
