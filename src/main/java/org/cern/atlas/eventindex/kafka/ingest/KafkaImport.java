@@ -1,4 +1,4 @@
-package org.atlas.eventindex.kafka.ingest;
+package org.cern.atlas.eventindex.kafka.ingest;
 
 
 import org.apache.avro.Schema;
@@ -94,7 +94,7 @@ public class KafkaImport
     props.put("linger.ms", 1);
     props.put("buffer.memory", 33554432);
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-    props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+    props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
 
     producer = new KafkaProducer<>(props);
 
@@ -146,12 +146,13 @@ public class KafkaImport
 
 
 		GenericRecord row = new GenericData.Record(schema);
+		col=0;
 
                 //runnumber and eventnumber :format 00299680-00000676949
                 startParse=System.currentTimeMillis();
                 keyParts=key.toString().split("-"); //EXCEPTION SHOULD BE HANDLED
-		row.put("runnumber",keyParts[0]);
-		row.put("eventnumber",keyParts[1]);
+		row.put("runnumber",Long.parseLong(keyParts[0]));
+		row.put("eventnumber",Long.parseLong(keyParts[1]));
                 cumulativeParse+=System.currentTimeMillis()-startParse;
 
                 startInsert=System.currentTimeMillis();
@@ -172,22 +173,22 @@ public class KafkaImport
                         for (String s: valueParts) System.out.println(s);
 
                 }
-						row.put("lumiblockn",Long.parseLong(valueParts[col++]));
-                row.put("bunchid",Long.parseLong(valueParts[col++]));
-                row.put("eventtime",Long.parseLong(valueParts[col++]));
-                row.put("eventtimenanosec",Long.parseLong(valueParts[col++]));
+		row.put("lumiblockn",Integer.parseInt(valueParts[col++]));
+                row.put("bunchid",Integer.parseInt(valueParts[col++]));
+                row.put("eventtime",Integer.parseInt(valueParts[col++]));
+                row.put("eventtimenanosec",Integer.parseInt(valueParts[col++]));
                 row.put("eventweight",Float.parseFloat(valueParts[col++]));
-                row.put("mcchannelnumber",Long.parseLong(valueParts[col++]));
+                row.put("mcchannelnumber",Integer.parseInt(valueParts[col++]));
                 row.put("lvl1id",valueParts[col++]);
-                row.put("issimulation",Long.parseLong(valueParts[col++]));
-                row.put("iscalibration",Long.parseLong(valueParts[col++]));
-                row.put("istestbeam",Long.parseLong(valueParts[col++]));
+                row.put("issimulation",Integer.parseInt(valueParts[col++]));
+                row.put("iscalibration",Integer.parseInt(valueParts[col++]));
+                row.put("istestbeam",Integer.parseInt(valueParts[col++]));
                 row.put("l1trigmask",valueParts[col++]);
                 row.put("l2trigmask",valueParts[col++]);
                 row.put("eftrigmask",valueParts[col++]);
-                row.put("smk",Long.parseLong(valueParts[col++]));
-                row.put("hltpsk",Long.parseLong(valueParts[col++]));
-                row.put("l1psk",Long.parseLong(valueParts[col++]));
+                row.put("smk",Integer.parseInt(valueParts[col++]));
+                row.put("hltpsk",Integer.parseInt(valueParts[col++]));
+                row.put("l1psk",Integer.parseInt(valueParts[col++]));
                 row.put("nam0",valueParts[col++]);
                 row.put("db0",valueParts[col++]);
                 row.put("cnt0",valueParts[col++]);
