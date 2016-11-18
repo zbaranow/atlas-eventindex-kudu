@@ -80,7 +80,7 @@ In order to import data from a MapFile stored on HDFS into Kafka the following p
 - <b>avroSchema</b> - An avro schema file to be used for data serialization
 
 ###### Example 1
-java -DavroSchema=./atlas_ei.avsc -DkafkaTopic=atlas_ei -DreportFrequency=50000 -DkafkaBrokers="kafka1:9092 kafka2:9092"  -Dfile=/user/atlevind/EI16.1/data16_cos.00299680.physics_Late.merge.AOD.f703_m1600 -DbatchSize=1000 -cp \$(hadoop classpath):./atlas-eventindex-kudu-1.0-SNAPSHOT.jar 
+`java -DavroSchema=./atlas_ei.avsc -DkafkaTopic=atlas_ei -DreportFrequency=50000 -DkafkaBrokers="kafka1:9092 kafka2:9092"  -Dfile=/user/atlevind/EI16.1/data16_cos.00299680.physics_Late.merge.AOD.f703_m1600 -DbatchSize=1000 -cp \$(hadoop classpath):./atlas-eventindex-kudu-1.0-SNAPSHOT.jar`
 
 In order to import data from a Kafka topic into Kudu the following parameters has to be specified
 - <b>kuduMaster</b> - Kudu master server name
@@ -92,5 +92,5 @@ In order to import data from a Kafka topic into Kudu the following parameters ha
 
 
 ###### Example 2
-java -DreportFrequency=50000 -DkuduMaster=itrac1508 -DtableName=atlas_event_index -DbatchSize=100 -DkafkaTopic=atlas_ei -DavroSchema=atlas_ei.avsc -cp target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.ingest.KafkaKuduImport
+`java -DreportFrequency=50000 -DkuduMaster=itrac1508 -DtableName=atlas_event_index -DbatchSize=100 -DkafkaTopic=atlas_ei -DavroSchema=atlas_ei.avsc -cp target/atlas-eventindex-kudu-1.0-SNAPSHOT.jar org.cern.atlas.eventindex.kudu.ingest.KafkaKuduImport`
 
