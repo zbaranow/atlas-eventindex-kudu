@@ -110,7 +110,6 @@ private static final String BROKERS = System.getProperty(
         Properties props = new Properties();
         props.put("group.id",GROUP_ID);
         props.put("enable.auto.commit", "false");
-        props.put("request.required.acks", "1");
         props.put("bootstrap.servers", BROKERS);
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
