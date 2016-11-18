@@ -6,6 +6,9 @@ package org.cern.atlas.eventindex.kudu.ingest;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+
 
 
 import org.apache.kudu.ColumnSchema;
@@ -19,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
+import java.util.Collections;
 import java.lang.Integer;
 import java.util.Properties;
 import java.io.File;
@@ -141,7 +145,6 @@ private static final String BROKERS = System.getProperty(
 
 	while (loop) {
 	     ConsumerRecords<String, byte[]> records = consumer.poll(TIMEOUT);
-             System.out.println(records.count());
 	     if (startParse!=0)
 	             cumulativeParse+=System.currentTimeMillis()-startParse;
 	     if (records.count() == 0) {
@@ -150,7 +153,11 @@ private static final String BROKERS = System.getProperty(
                  //System.out.printf("Got %d records after %d timeouts\n", records.count(), timeouts);
                  timeouts = 0;
              }
-             for (ConsumerRecord<String, byte[]> record : records) {
+
+	     //handling messages
+	     for (TopicPartition partition : records.partitions()) {
+ 	     	List<ConsumerRecord<String, byte[]>> partitionRecords = records.records(partition);
+		for (ConsumerRecord<String, byte[]> record : partitionRecords) {
 		 if (i==0) System.out.println("Started at "+record.offset());
                  startParse=System.currentTimeMillis();
 
@@ -205,12 +212,15 @@ private static final String BROKERS = System.getProperty(
 		if ((i % BATCH_SIZE) == 0 )
                 {
 
-                   //flush session
+                   //flush Kudu session
                    startFlush=System.currentTimeMillis();
                    session.flush();
                    cumulativeFlush+=System.currentTimeMillis()-startFlush;
-                   consumer.commitSync();
-		   System.out.println("Commiting after "+i+" at "+ record.offset());
+		   //commiting Kafka
+//                   System.out.println("Commiting after "+i+" at "+ record.offset());
+
+		   consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(record.offset()+1)));
+//		   System.out.println("Commiting after "+i+" at "+ record.offset());
 
                 }
 
@@ -227,8 +237,8 @@ private static final String BROKERS = System.getProperty(
 
         	}//if report
 
-             }//for each message
-
+              }//for each message
+	     }//for each parititon
 
 
 		
