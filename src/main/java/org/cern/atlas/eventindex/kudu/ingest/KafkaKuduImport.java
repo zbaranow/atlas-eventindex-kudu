@@ -21,6 +21,7 @@ import org.apache.kudu.client.SessionConfiguration.FlushMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Collections;
 import java.lang.Integer;
@@ -61,7 +62,7 @@ private static final String BROKERS = System.getProperty(
       "groupId", "atlas_consumer");
 
   private static final String TOPIC = System.getProperty(
-      "kafkaTopic", "atlas_test");
+      "kafkaTopic", "atlas_ei");
 
 
 
@@ -140,6 +141,10 @@ private static final String BROKERS = System.getProperty(
 	DatumReader<GenericRecord> reader = new SpecificDatumReader<GenericRecord>(schema);
 	byte[] received_message = null;
 
+	Map<TopicPartition,OffsetAndMetadata> readPartitions = new HashMap<TopicPartition,OffsetAndMetadata>();
+	long offsetRead=0;
+	
+
         boolean loop=true;
 
 	while (loop) {
@@ -190,7 +195,10 @@ private static final String BROKERS = System.getProperty(
 			} else if (type.equals(Schema.Type.FLOAT))
 			{
 				row.addFloat(field.name(), (Float)(grecord.get(field.name())));
-			} else
+			} else if (type.equals(Schema.Type.BOOLEAN))
+                        {
+                                row.addBoolean(field.name(), (Boolean)(grecord.get(field.name())));
+                        } else
 			{
 		//		throw new RuntimeException("ConvertEnvMultiTable2MultiAvro doesn't supper type :" + type + " yet.  Put in a bug request");
 			}
@@ -218,8 +226,10 @@ private static final String BROKERS = System.getProperty(
 		   //commiting Kafka
 //                   System.out.println("Commiting after "+i+" at "+ record.offset());
 
-		   consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(record.offset()+1)));
-//		   System.out.println("Commiting after "+i+" at "+ record.offset());
+		   readPartitions.put(partition,new OffsetAndMetadata(record.offset()+1));
+		   consumer.commitSync(readPartitions);
+		   readPartitions.clear();
+
 
                 }
 
@@ -235,13 +245,19 @@ private static final String BROKERS = System.getProperty(
 	                " F: "+cumulativeFlush);
 
         	}//if report
+		offsetRead=record.offset();
 
               }//for each message
+	      
+
+	       //bumping up a patition HWM
+               readPartitions.put(partition,new OffsetAndMetadata(offsetRead+1));
+		
 	     }//for each parititon
 
 
 		
-	     consumer.commitSync();
+//	     consumer.commitSync();
 
 	     startParse=System.currentTimeMillis();
         }//while loop

@@ -71,8 +71,8 @@ public class KuduImport {
 		Configuration conf = new Configuration();
 
 
-		conf.addResource(new Path("/afs/cern.ch/user/z/zbaranow/hadoop/clusters/lxhadoop/etc/hadoop/conf/core-site.xml"));
-        	conf.addResource(new Path("/afs/cern.ch/user/z/zbaranow/hadoop/clusters/lxhadoop/etc/hadoop/conf/hdfs-site.xml"));
+//		conf.addResource(new Path("/afs/cern.ch/user/z/zbaranow/hadoop/clusters/lxhadoop/etc/hadoop/conf/core-site.xml"));
+//        	conf.addResource(new Path("/afs/cern.ch/user/z/zbaranow/hadoop/clusters/lxhadoop/etc/hadoop/conf/hdfs-site.xml"));
 
 
                 fs = FileSystem.get(conf);
@@ -155,22 +155,22 @@ public class KuduImport {
 		col=0;
 
                 startInsert=System.currentTimeMillis();
-		row.addLong("lumiblockn",Long.parseLong(valueParts[col++]));
-                row.addLong("bunchid",Long.parseLong(valueParts[col++]));
-                row.addLong("eventtime",Long.parseLong(valueParts[col++]));
-                row.addLong("eventtimenanosec",Long.parseLong(valueParts[col++]));
+		row.addInt("lumiblockn",Integer.parseInt(valueParts[col++]));
+                row.addInt("bunchid",Integer.parseInt(valueParts[col++]));
+                row.addInt("eventtime",Integer.parseInt(valueParts[col++]));
+                row.addInt("eventtimenanosec",Integer.parseInt(valueParts[col++]));
                 row.addFloat("eventweight",Float.parseFloat(valueParts[col++]));
-                row.addLong("mcchannelnumber",Long.parseLong(valueParts[col++]));
+                row.addInt("mcchannelnumber",Integer.parseInt(valueParts[col++]));
                 row.addString("lvl1id",valueParts[col++]);
-                row.addLong("issimulation",Long.parseLong(valueParts[col++]));
-                row.addLong("iscalibration",Long.parseLong(valueParts[col++]));
-                row.addLong("istestbeam",Long.parseLong(valueParts[col++]));
+                row.addBoolean("issimulation",Integer.parseInt(valueParts[col++])==1);
+                row.addBoolean("iscalibration",Integer.parseInt(valueParts[col++])==1);
+                row.addBoolean("istestbeam",Integer.parseInt(valueParts[col++])==1);
                 row.addString("l1trigmask",valueParts[col++]);
                 row.addString("l2trigmask",valueParts[col++]);
                 row.addString("eftrigmask",valueParts[col++]);
-                row.addLong("smk",Long.parseLong(valueParts[col++]));
-                row.addLong("hltpsk",Long.parseLong(valueParts[col++]));
-                row.addLong("l1psk",Long.parseLong(valueParts[col++]));
+                row.addInt("smk",Integer.parseInt(valueParts[col++]));
+                row.addInt("hltpsk",Integer.parseInt(valueParts[col++]));
+                row.addInt("l1psk",Integer.parseInt(valueParts[col++]));
                 row.addString("nam0",valueParts[col++]);
                 row.addString("db0",valueParts[col++]);
                 row.addString("cnt0",valueParts[col++]);

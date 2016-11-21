@@ -180,9 +180,9 @@ public class KafkaImport
                 row.put("eventweight",Float.parseFloat(valueParts[col++]));
                 row.put("mcchannelnumber",Integer.parseInt(valueParts[col++]));
                 row.put("lvl1id",valueParts[col++]);
-                row.put("issimulation",Integer.parseInt(valueParts[col++]));
-                row.put("iscalibration",Integer.parseInt(valueParts[col++]));
-                row.put("istestbeam",Integer.parseInt(valueParts[col++]));
+                row.put("issimulation",Integer.parseInt(valueParts[col++])==1);
+                row.put("iscalibration",Integer.parseInt(valueParts[col++])==1);
+                row.put("istestbeam",Integer.parseInt(valueParts[col++])==1);
                 row.put("l1trigmask",valueParts[col++]);
                 row.put("l2trigmask",valueParts[col++]);
                 row.put("eftrigmask",valueParts[col++]);
